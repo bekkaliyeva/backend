@@ -2,27 +2,36 @@
 $host = 'localhost';
 $user='root';
 $password = 'root';
-$db = 'project';
+$db = 'back';
 $conn = mysqli_connect($host,$user,$password,$db);
 $conn_error = mysqli_connect_error();
 $query="SELECT * FROM `users`";
 $results = mysqli_query($conn, $query);
-$Name=filter_input(INPUT_POST,'Name');
+
+$username=filter_input(INPUT_POST,'username');
 $Password=filter_input(INPUT_POST,'Password');
 $ConfPassw=filter_input(INPUT_POST,'ConfPassw');
+$email=filter_input(INPUT_POST,'email');
+$Name=filter_input(INPUT_POST,'Name');
+
 $free=true;
+$WP=false;
+
 if (isset($Name)){
+    /* проверяет не занято ли имя пользователя*/
     while ($row = mysqli_fetch_array($results)) {
-        if ($row['login']==$Name){
+        if ($row['username']==$username){
             $free=false;
             break;
         }
     }
-    if ($free && $Password==$ConfPassw){
-        $query="INSERT INTO `users` (`login`, `password`, `admin`) VALUES ('".$Name."', '".$Password."', '0');";
+    if(strlen($Password)>8 && preg_match("#[0-9]+#",$Password) && preg_match("#[a-zA-z]+#",$Password) && $Password==$ConfPassw){
+        $WP=true;
+    }
+    if ($free && $WP){
+        /* отправляет данные на дб*/
+        $query="INSERT INTO `users` (`username`, `password`, `email`, `FullName`) VALUES ('".$username."', '".$Password."', '".$email."', '".$Name."');";
         $results = mysqli_query($conn, $query);
-        setcookie("admin", "", time() - 100);
-        setcookie("user", $Name);
         header("Location: empty.html");
         die();
     }
@@ -31,7 +40,6 @@ if ($conn_error != null){
     echo "There is some connection error:<p>  $conn_error </p>";
 }
 ?>
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -51,18 +59,49 @@ if ($conn_error != null){
 <?php
 if (isset($Name)){
     echo "<div id='errors'>";
-    if(!$free){
+    if(!preg_match("#[#$%^&*'/;:.,!@()+-]#",$username)||!preg_match("#[a-zA-z]+#",$Password)){
+        /*выводит ошибку если пароль не содержит букв или цифр */
         echo "<div class='error'>";
-        echo "This username " .$Name . " is already reserved!!!";
+        echo "Password should have at least 1 number and 1 letter";
+        echo "</div>";
+        echo "<br>";
+    }
+    if(!$free){
+        /*выводит ошибку если  занято имя пользователя*/
+        echo "<div class='error'>";
+        echo "This username ".$username." is already reserved!!!";
         echo "</div>" ;
         echo "<br>";
     }
     if($Password!=$ConfPassw){
+        /*выводит ошибку если  не сходятся пароли*/
         echo "<div class='error'>";
         echo "Password and Confirm password does not equal to each other";
         echo "</div>";
         echo "<br>";
     }
+
+    if(strlen($Password)<8){
+        /*выводит ошибку если пароль короткий*/
+        echo "<div class='error'>";
+        echo "Password should be not less than 8 characters";
+        echo "</div>";
+        echo "<br>";
+    }
+    if(!preg_match("#[0-9]+#",$Password)||!preg_match("#[a-zA-z]+#",$Password)){
+        /*выводит ошибку если пароль не содержит букв или цифр */
+        echo "<div class='error'>";
+        echo "Password should have at least 1 number and 1 letter";
+        echo "</div>";
+        echo "<br>";
+    }
+    /*if(ctype_upper($Password) || ctype_lower($Password)){
+        //выводит ошибку если пароль несодержит верхнеги или нижнего регистра
+        echo "<div class='error'>";
+        echo "Password should include uppercase and lowercase letters";
+        echo "</div>";
+        echo "<br>";
+    }*/
     echo "</div>";
 
 }
@@ -91,19 +130,27 @@ mysqli_close($conn);
     <h1>Registering</h1>
     <form action = "register.php" method="post">
         <label><b>Username:</b></label>
-        <input type="text" name="username" placeholder="Enter Username" required>
+        <input type="text" name="username" placeholder="Enter Username" required <?php //не больше 15
+        if (isset($username)){
+            echo "value='".$username."'";
+        }
+        ?>>
         <label><b>Password:</b></label>
-        <input type="password" name="Password" placeholder="Enter Password" required>
+        <input  type="password" name="Password" placeholder="At least 8 characters" required>
         <label><b>Confirm Password:</b></label>
-        <input type="password" name="ConfPassw" placeholder="Password one more time" required>
+        <input type="password" name="ConfPassw" placeholder="Check the password" required>
         <label><b>e-mail:</b></label>
-        <input type="text" name="e-mail" placeholder="Enter e-mail" required>
+        <input type="text" name="email" placeholder="Enter e-mail" required <?php
+        if (isset($email)){
+            echo "value='$email'";
+        }
+        ?>>
         <label><b>Name:</b></label>
-        <input type="text" name="Name" placeholder="Enter your full name" required>
-        <select name="gender">
-            <option value="f">Female </option>
-            <option value="m">Male </option>
-        </select>
+        <input type="text" name="Name" placeholder="Surename Name" required <?php
+        if (isset($Name)){
+            echo "value='".$Name."'";
+        }
+        ?>>
         <button type="submit" id="signin">Enter</button>
     </form>
 </div>

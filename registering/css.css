@@ -8,6 +8,7 @@ body {
 
 /* полоска в самом верху  */
 .header_section {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     padding: 20px;

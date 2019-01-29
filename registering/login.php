@@ -32,6 +32,7 @@ if (isset($Name)) {
 <head>
     <meta charset="UTF-8">
     <title>Sign in</title>
+    <script src="index.js" defer></script>
     <link rel="stylesheet" href="css.css">
 </head>
 <body >
@@ -43,10 +44,10 @@ if (isset($Name)) {
     <div class = "headerButton"><a href = "#">Movies</a></div>
     <div class = "headerButton"><a href = "register.php">Register</a></div>
 </div>
-<div id='errors'>
 <?php
 $thereis=false;
 if (isset($Name)) {
+    echo "<div id='errors'>";
     while ($row = mysqli_fetch_array($results)) {
         if($row['login']==$Name && $row['password']!=$Password){
             $thereis=true;
@@ -63,22 +64,38 @@ if (isset($Name)) {
         echo "</div>";
         echo "<br>";
     }
+    echo "</div>";
 }
 mysqli_close($conn);
 ?>
-</div>
+<article class="flex-article">
+    <div class="mySlides fade">
+        <img src="https://a.lmcdn.ru/product/H/E/HE002EMDQCS8_7795888_1_v1.jpg">
+    </div>
+
+    <div class="mySlides fade">
+        <img src="https://a.lmcdn.ru/product/D/O/DO005EWDMVF8_7806459_2_v1.jpg">
+    </div>
+
+    <div class="mySlides fade">
+        <img src="https://a.lmcdn.ru/product/H/E/HE002EMDYAC9_7904798_2_v1.jpg">
+    </div>
+
+    <div class="mySlides fade">
+        <img src="https://a.lmcdn.ru/product/B/E/BE031EWDUMI0_7938878_2_v1.jpg">
+    </div>
+
+</article>
 <div class="container">
     <form action = "login.php" method="post">
 
         <h1>Sign in</h1>
-        <hr>
         <label><b>Username:</b></label>
         <input id="name" type="text" name="Name" placeholder="Enter Username" required>
         <label><b>Password:</b></label>
         <input id="password" type="password" name="Password" placeholder="Enter Password" required>
-        <hr>
+        <label><input type="checkbox" name="remember"> Remember me</label>
         <button type="submit" id="signin">Login</button>
-        <label>
 
     </form></div>
 </body>
